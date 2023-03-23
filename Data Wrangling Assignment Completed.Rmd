@@ -1,0 +1,90 @@
+---
+title: "Data Wrangling Assignment"
+author: "Robert Bell"
+date: "2023-03-23"
+output:
+  html_document:
+    df_print: paged
+---
+
+```R
+
+
+
+# just had to install tidyverse as dpylr was already installed
+install.packages("tidyverse")
+library(tidyverse)
+library(dplyr)
+
+
+
+#Question 1     
+microbiome.fungi <- read.csv("Microbiome.csv")
+micribiome.fungi2 <- select(microbiome.fungi, OTU, SampleID, Abundance, Crop, Compartment, DateSampled, GrowthStage, Treatment, Rep, Fungicide, Kingdom:Species, Taxonomy)
+# I may or may not have spelled microbiome with an "i" so the string will have that name in all questions
+
+#Question 2 
+
+Abundance_Mean <- micribiome.fungi2 %>%
+  group_by(Compartment) %>%
+  mutate(Abundancepercent = Abundance*100) %>%
+  summarise(Mean = mean(Abundancepercent)) %>%
+  head(micribiome.fungi2)
+
+#Question 3 
+
+Abundance_Mean_Compartment_Fungicide <- micribiome.fungi2 %>%
+  group_by(Compartment, Fungicide) %>%
+  mutate(Abundancepercent = Abundance*100) %>%
+  summarise(Mean = mean(Abundancepercent)) %>%
+  head(Abundance_Mean_Compartment_Fungicide)
+
+#Question 4
+
+Dothideomycetes_analysis <- micribiome.fungi2 %>%
+  filter(Class == "Dothideomycetes") %>%
+  group_by(Compartment, Fungicide) %>%
+  mutate(Abundancepercent = Abundance*100) %>%
+  summarise(Mean = mean(Abundancepercent))
+  head(Dothideomycetes_analysis)
+
+
+# I don't understand how this code is not working.  It says there is an error in    `class == "Dothideomycetes"`
+
+#Question 5 
+
+Dothideomycetes_analysis_order <- micribiome.fungi2 %>%
+  filter(Class == "Dothideomycetes") %>%
+  group_by(Order, Compartment, Fungicide) %>%
+  mutate(Abundancepercent = Abundance * 100) %>%
+  summarise(Mean = mean(Abundancepercent)) 
+  head(Dothideomycetes_analysis_order)
+  
+#Question 6 
+  
+  SE_Mean <- micribiome.fungi2 %>%
+    filter(Class == "Dothideomycetes") %>%
+    group_by(Order, Compartment, Fungicide) %>%
+    mutate(Abundancepercent = Abundance * 100) %>%
+    summarise(Mean = mean(Abundancepercent)),
+              n = n(),
+              sd.dev = sd(Abundancepercent %>
+    mutate(std.err = sd.dev/sqrt(n)))
+  head(SE_Mean)
+
+#question 7 
+  
+  Wide_format <-  SE_Mean %>%
+    select(Order, Compartment, Fungicide, Mean) %>%
+    pivot_wider(names_from = Compartment, values_from = Mean)
+  head(Wide_format)
+  
+  #Question 8 
+  
+  ggplot(Wide_format ,aes(x  = Mean, y  = reorder(Order, +Mean),fill = Fungicide)) +
+    geom_bar(stat = "identity",position = "dodge")+
+    labs(x = "Percent relative abundance", y = "")
+  
+   
+```R
+
